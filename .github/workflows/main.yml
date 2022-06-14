@@ -17,9 +17,9 @@ on:
             - "*"
 
 # TO BE CHANGED
-defaults:
-  run:
-    working-directory: environments/databricks-department-clusters-pat
+#defaults:
+ # run:
+#    working-directory: environments/databricks-department-clusters-pat
 
 jobs:
   build:
@@ -57,7 +57,7 @@ jobs:
         with:
           tf_actions_version: 0.12.13
           tf_actions_subcommand: 'init'
-          #tf_actions_working_dir: 'environments'
+          tf_actions_working_dir: 'environments/databricks-department-clusters-pat'
           tf_actions_comment: true
           #args: '-backend-config="token=${{ secrets.TF_API_TOKEN }}" -backend-config="organization=CHANGE_ME"'
 
