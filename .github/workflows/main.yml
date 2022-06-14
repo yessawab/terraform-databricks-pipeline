@@ -3,9 +3,12 @@
 name: ' Validate Terraform code: '
 
 on:
-    pull_request:
-        branches:
-            - main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 defaults:
   run:
