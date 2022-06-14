@@ -15,6 +15,11 @@ on:
     push:
         branches:
             - "*"
+
+defaults:
+  run:
+    working-directory: environment
+
 jobs:
   build:
     #if: github.event_name == 'pull_request'
@@ -26,7 +31,7 @@ jobs:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
       # TO BE CHANGED
-      working-directoy: ../environment
+      #working-directoy: ../environment
 
     steps:
       - uses: actions/checkout@v3
