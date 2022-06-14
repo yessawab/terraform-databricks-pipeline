@@ -19,7 +19,7 @@ on:
 # TO BE CHANGED
 defaults:
   run:
-    working-directory: environment
+    working-directory: environments
 
 jobs:
   build:
