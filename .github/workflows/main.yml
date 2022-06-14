@@ -25,7 +25,8 @@ jobs:
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
-      working-directoy: environments/databricks-department-clusters-pat/
+      # TO BE CHANGED
+      working-directoy: environment
 
     steps:
       - uses: actions/checkout@v3
