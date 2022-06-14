@@ -1,0 +1,106 @@
+# This is a basic Azure DevOps pipeline to validate Terraform
+
+name: ' Validate Terraform code: '
+
+on:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - "environments/databricks-department-clusters-pat/"
+            - "modules/databricks-department-clusters/"
+            - "!environments/databricks-department-clusters-pat/README.md"
+            - "!modules/databricks-department-clusters/README.md"
+    # TO BE DELETED
+    push:
+        branches:
+            - "*"
+
+# TO BE CHANGED
+defaults:
+  run:
+    working-directory: environment
+
+jobs:
+  build:
+    #if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2.0.0
+        with:
+            terraform_version: '1.0.11'
+      
+      - name: Set up Databricks CLI profile for Terraform provider
+        run: |
+            echo "[DEFAULT]" >> ~/.databrickscfg
+            echo "host = $DATABRICKS_HOST" >> ~/.databrickscfg
+            echo "token = $DATABRICKS_TOKEN" >> ~/.databrickscfg
+                    
+      - name: Check formatting of Terraform code
+        id: fmt
+        run: |
+          ls
+          terraform fmt -check
+
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.13
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: 'environment'
+          tf_actions_comment: true
+          #args: '-backend-config="token=${{ secrets.TF_API_TOKEN }}" -backend-config="organization=CHANGE_ME"'
+
+      - name: Terraform Validate
+        id: validate
+        run: terraform validate -no-color
+      
+      - name: Terraform Plan
+        id: plan
+        #if: github.event_name == 'pull_request'
+        run: terraform plan -no-color -input=false
+        continue-on-error: true
+      
+      - name: Update Pull Request
+        uses: actions/github-script@v6.1.0
+        #if: github.event_name == 'pull_request'
+        env:
+          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+      
+            <details><summary>Show Plan</summary>
+      
+            \`\`\`\n
+            ${process.env.PLAN}
+            \`\`\`
+      
+            </details>
+      
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+      
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+      
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
