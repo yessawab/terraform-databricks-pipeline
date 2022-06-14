@@ -1,0 +1,42 @@
+# This is a basic Azure DevOps pipeline to validate Terraform
+
+name: ' Validate Terraform code: '
+
+on:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - environments/databricks-department-clusters-pat/
+            - modules/databricks-department-clusters/
+        paths-ignore:
+            - environments/databricks-department-clusters-pat/README.md
+            - modules/databricks-department-clusters/README.md
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
+      working-directoy: environments/databricks-department-clusters-pat/
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2.0.0
+        with:
+            terraform_version: '1.0.11'
+      
+      - name: Set up Databricks CLI profile for Terraform provider
+        run: |
+            echo "[DEFAULT]" >> ~/.databrickscfg
+            echo "host = $DATABRICKS_HOST" >> ~/.databrickscfg
+            echo "token = $DATABRICKS_TOKEN" >> ~/.databrickscfg
+                    
+      - name: Check formatting of Terraform code
+        run: |
+          terraform fmt -check
