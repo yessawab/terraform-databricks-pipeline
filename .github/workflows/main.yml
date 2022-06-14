@@ -11,19 +11,14 @@ on:
             - "modules/databricks-department-clusters/"
             - "!environments/databricks-department-clusters-pat/README.md"
             - "!modules/databricks-department-clusters/README.md"
-    # TO BE DELETED
-    push:
-        branches:
-            - "*"
 
-# TO BE CHANGED
 defaults:
   run:
     working-directory: environments/databricks-department-clusters-pat
 
 jobs:
   build:
-    #if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -65,13 +60,11 @@ jobs:
       
       - name: Terraform Plan
         id: plan
-        if: github.event_name == 'pull_request'
         run: terraform plan -no-color -input=false
         continue-on-error: true
       
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
-        if: github.event_name == 'pull_request'
         env:
           PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
         with:
