@@ -17,9 +17,9 @@ on:
             - "*"
 
 # TO BE CHANGED
-defaults:
-  run:
-    working-directory: environment
+#defaults:
+#  run:
+#    working-directory: environment
 
 jobs:
   build:
