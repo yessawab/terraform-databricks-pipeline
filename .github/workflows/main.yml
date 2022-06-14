@@ -6,12 +6,7 @@ on:
     pull_request:
         branches:
             - main
-        paths:
-            - "environments/databricks-department-clusters-pat/"
-            - "modules/databricks-department-clusters/"
-            - "!environments/databricks-department-clusters-pat/README.md"
-            - "!modules/databricks-department-clusters/README.md"
-
+            
 defaults:
   run:
     working-directory: environments/databricks-department-clusters-pat
