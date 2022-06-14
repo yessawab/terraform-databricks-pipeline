@@ -1,0 +1,81 @@
+# This is a basic Azure DevOps pipeline to validate Terraform
+
+name: ' Validate Terraform code: '
+
+variables:
+  - group: 'TerraformProdDeploy'
+
+# We disable builds for any commits as everything should go through pull requests
+trigger: none
+
+pr:
+  branches:
+    include:
+    - main
+  paths:
+    # We want to handle only changes relevant for this pipeline
+    include:
+    - environments/databricks-department-clusters-pat/
+    - modules/databricks-department-clusters/
+    exclude:
+    - environments/databricks-department-clusters-pat/README.md
+    - modules/databricks-department-clusters/README.md
+    
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+
+- checkout: self
+
+- task: TerraformInstaller@0
+  inputs:
+    terraformVersion: '1.0.11'
+  displayName: 'Install Terraform'
+
+- script: |
+    echo "[DEFAULT]" >> ~/.databrickscfg
+    echo "host = $DATABRICKS_HOST" >> ~/.databrickscfg
+    echo "token = $DATABRICKS_TOKEN" >> ~/.databrickscfg
+  env:
+    DATABRICKS_HOST: $(DATABRICKS_HOST)
+    DATABRICKS_TOKEN: $(DATABRICKS_TOKEN)
+  displayName: 'Set up Databricks CLI profile for Terraform provider'
+
+- script: |
+    terraform fmt -check
+  displayName: 'Check formatting of Terraform code'
+  workingDirectory: environments/databricks-department-clusters-pat/
+  enabled: 'true'
+
+- task: TerraformCLI@0
+  displayName: 'Terraform init'
+  inputs:
+    command: 'init'
+    commandOptions: '-input=false -no-color'
+    backendType: 'azurerm'
+    backendServiceArm: $(SERVICE_CONNECTION_NAME)
+    backendAzureRmResourceGroupName: $(BACKEND_RG_NAME)
+    backendAzureRmStorageAccountName: $(BACKEND_SA_NAME)
+    backendAzureRmContainerName: $(BACKEND_CONTAINER_NAME)
+    backendAzureRmKey: $(BACKEND_KEY)
+    allowTelemetryCollection: false
+    workingDirectory: environments/databricks-department-clusters-pat/
+
+- task: TerraformCLI@0
+  displayName: 'Terraform validate'
+  inputs:
+    command: 'validate'
+    commandOptions: '-no-color'
+    environmentServiceName: $(SERVICE_CONNECTION_NAME)
+    allowTelemetryCollection: false
+    workingDirectory: environments/databricks-department-clusters-pat/
+
+- task: TerraformCLI@0
+  displayName: 'Terraform plan'
+  inputs:
+    command: 'plan'
+    commandOptions: '-lock=false -input=false -no-color'
+    environmentServiceName: $(SERVICE_CONNECTION_NAME)
+    allowTelemetryCollection: false
+    workingDirectory: environments/databricks-department-clusters-pat/
