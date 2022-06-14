@@ -6,7 +6,7 @@ on:
     pull_request:
         branches:
             - main
-            
+
 defaults:
   run:
     working-directory: environments/databricks-department-clusters-pat
@@ -90,3 +90,13 @@ jobs:
       - name: Terraform Plan Status
         if: steps.plan.outcome == 'failure'
         run: exit 1
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
+        id: apply
+        run: terraform apply -no-color -input=false
+        continue-on-error: true
+
+        - name: Terraform Apply Status
+          if: steps.apply.outcome == 'failure'
+          run: exit 1        
