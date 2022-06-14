@@ -7,11 +7,10 @@ on:
         branches:
             - main
         paths:
-            - environments/databricks-department-clusters-pat/
-            - modules/databricks-department-clusters/
-        paths-ignore:
-            - environments/databricks-department-clusters-pat/README.md
-            - modules/databricks-department-clusters/README.md
+            - "environments/databricks-department-clusters-pat/"
+            - "modules/databricks-department-clusters/"
+            - "!environments/databricks-department-clusters-pat/README.md"
+            - "!modules/databricks-department-clusters/README.md"
 jobs:
   build:
     runs-on: ubuntu-latest
