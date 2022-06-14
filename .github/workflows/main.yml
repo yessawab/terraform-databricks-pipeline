@@ -97,7 +97,7 @@ jobs:
       - name: Terraform Apply
         if: github.ref == 'refs/heads/main'
         id: apply
-        run: terraform apply -no-color -input=false
+        run: terraform apply -no-color -input=false --auto-approve
         continue-on-error: true
 
       - name: Terraform Apply Status
