@@ -15,9 +15,6 @@ on:
     push:
         branches:
             - "*"
-        paths:
-            - "environments/databricks-department-clusters-pat/"
-            - "modules/databricks-department-clusters/"
 jobs:
   build:
     runs-on: ubuntu-latest
