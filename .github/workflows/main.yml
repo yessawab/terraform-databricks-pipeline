@@ -19,7 +19,7 @@ on:
 # TO BE CHANGED
 defaults:
   run:
-    working-directory: environments
+    working-directory: environments/databricks-department-clusters-pat
 
 jobs:
   build:
