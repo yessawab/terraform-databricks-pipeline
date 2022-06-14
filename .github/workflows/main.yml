@@ -16,6 +16,7 @@ on:
         branches:
             - "*"
 
+# TO BE CHANGED
 defaults:
   run:
     working-directory: environment
@@ -30,8 +31,6 @@ jobs:
     env:
       DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
       DATABRICKS_TOKEN:  ${{ secrets.DATABRICKS_TOKEN }}
-      # TO BE CHANGED
-      #working-directoy: ../environment
 
     steps:
       - uses: actions/checkout@v3
@@ -53,9 +52,14 @@ jobs:
           ls
           terraform fmt -check
 
-      - name: Terraform Init
-        id: init
-        run: terraform init
+      - name: 'Terraform Init'
+        uses: hashicorp/terraform-github-actions@master
+        with:
+          tf_actions_version: 0.12.13
+          tf_actions_subcommand: 'init'
+          tf_actions_working_dir: '.'
+          tf_actions_comment: true
+          #args: '-backend-config="token=${{ secrets.TF_API_TOKEN }}" -backend-config="organization=CHANGE_ME"'
 
       - name: Terraform Validate
         id: validate
