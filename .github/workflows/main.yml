@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: 
       name: production
-      url: ${{ secrets.DATABRICKS_HOST }}
+      url: $DATABRICKS_HOST
     strategy:
       max-parallel: 4
     env:
